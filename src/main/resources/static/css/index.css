@@ -1,0 +1,10 @@
+h1{
+	display: block;
+	background: #0099CC!important;
+	height: 40px;
+	font-size: 16px;
+	line-height: 38px;
+	color: #fff;
+	border-radius: 4px;
+	text-align: center;
+}

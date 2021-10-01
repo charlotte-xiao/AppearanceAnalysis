@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>网恋照妖镜</title>
+		<link rel="icon" href="./img/logo.svg">
+		<link rel="stylesheet" href="./css/element-ui.css">
+		<link rel="stylesheet" href="./css/index.css">
+	</head>
+	<body>
+		<div id="app">
+			<div v-if ="visible">
+				<h1>链接生成</h1>
+				<el-form ref="form" :model="form" label-width="80px">
+					<el-form-item label="链接标识">
+					    <el-input v-model="form.id"></el-input>
+					</el-form-item>
+					<el-form-item label="跳转地址">
+					    <el-input v-model="form.direction"></el-input>
+					</el-form-item>
+					 <el-form-item>
+						<el-button type="primary" @click="generatorLink">生成链接</el-button>
+						<el-button type="success" @click="showPhoto">查看照片</el-button>
+					  </el-form-item>
+				</el-form>
+				<el-table
+						:data="tableData"
+						border
+						stripe
+						style="width: 100%">
+					<el-table-column
+							type="index"
+							label="序号"
+							width="100px">
+					</el-table-column>
+					<el-table-column
+							prop="link"
+							label="链接">
+						<template slot-scope="scope">
+							<a :href="scope.row.link" style="color: #3a8ee6; text-decoration: none;" target="_blank">{{scope.row.link}}</a>
+						</template>
+					</el-table-column>
+				</el-table>
+				<el-dialog
+				  title="链接地址"
+				  :visible.sync="dialogVisible"
+				  width="50%">
+					<textarea id="paste" style="position: absolute;top: 0;left: 0;opacity: 0;z-index: -10;" v-model="linkDirection"></textarea>
+				  <span style="color: cadetblue;">{{this.linkDirection}}</span>
+				  <span slot="footer" class="dialog-footer">
+				    <el-button type="primary" @click="copy">复 制</el-button>
+				  </span>
+				</el-dialog>
+			</div>
+			<!--			身份验证-->
+			<el-dialog
+			  :visible = "!visible"
+			  title="身份验证"
+			  width="50%">
+			  <el-form ref="form" :model="auth" label-width="80px">
+			  	<el-form-item label="用户名">
+			  	    <el-input v-model="auth.username"></el-input>
+			  	</el-form-item>
+			  	<el-form-item label="密码">
+			  	    <el-input v-model="auth.password" show-password></el-input>
+			  	</el-form-item>
+			  </el-form>
+			  <span slot="footer" class="dialog-footer">
+				<el-button type="primary" @click="verify">验 证</el-button>
+			  </span>
+			</el-dialog>
+
+			
+		</div>
+	</body>
+	<!-- import Axois before Element -->
+	<script src="./js/axois.js"></script>
+	<!-- import Vue before Element -->
+	<script src="./js/vue.min.js"></script>
+	<!-- import JavaScript -->
+	<script src="./js/element-ui.js"></script>
+	<script>
+		var vue = new Vue({
+			el: '#app',
+			data: function() {
+				return {
+					visible: false,
+					form:{
+						id: '1',
+						direction: 'https://pc.meitu.com/'
+					},
+					auth:{
+						username: '',
+						password: ''
+					},
+					linkDirection: '',
+					dialogVisible: false,
+					tableData: []
+				}
+			},
+			methods:{
+				generatorLink(){
+					if(this.form.id == "" || this.form.direction == "" ){
+						this.$message.error('警告,请输入链接标识ID和跳转地址！');
+					}else{
+						this.$message.success('生成成功～');
+						this.dialogVisible = true;
+						this.linkDirection = window.location.origin+"/index.html?id="+this.form.id+"&url="+this.form.direction;
+					}
+				},
+				showPhoto(){
+					let that = this;
+					if(that.form.id == "" ){
+						that.$message.error('警告,请输入链接标识ID');
+					}else{
+						axios.get('/show/'+that.form.id)
+						.then(function (data){
+							that.tableData = data.data;
+							that.$message.success('获取成功～');
+						})
+					}
+				},
+				verify(){
+					let that = this;
+					axios.get('/verify/'+that.auth.username + '/'+that.auth.password)
+					.then(function (data){
+						if(data.data){
+							that.visible = true;
+							that.$message.success('登录成功～');
+						}else{
+							that.$message.error('登录失败～');
+						}
+					})
+				},
+				copy(){
+					document.querySelector('#paste').select();
+					document.execCommand('copy');
+					this.dialogVisible = false;
+					this.$message.success('复制成功～');
+				}
+			}
+		})
+	</script>
+</html>
