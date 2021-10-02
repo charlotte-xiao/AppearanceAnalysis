@@ -14,9 +14,6 @@ public class Picture {
     private String id;
 
     @NonNull
-    private String url;
-
-    @NonNull
     private String img;
 
 }

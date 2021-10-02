@@ -31,6 +31,11 @@ public class ShowController {
         if(!file.exists()){file.mkdir();}
     }
 
+    /**
+     * 获取图片链接
+     * @param id
+     * @return
+     */
     @GetMapping("/show/{id}")
     public List<Link> show(@PathVariable("id") String id){
         if(TOKEN.equals(id)){

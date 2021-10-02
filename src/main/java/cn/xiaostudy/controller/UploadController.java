@@ -4,8 +4,8 @@ import cn.xiaostudy.config.FileMvcConfig;
 import cn.xiaostudy.vo.Picture;
 import lombok.Data;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,15 +33,28 @@ public class UploadController {
         if(!file.exists()){file.mkdir();}
     }
 
+    /**
+     * 上传图片
+     * @param picture
+     * @return
+     */
     @PostMapping("/upload")
-    public ModelAndView upload(Picture picture){
+    public Boolean upload(@RequestBody Picture picture){
         if(Optional.ofNullable(picture).map(Picture::getImg).orElse("").contains(HEADER)){
             picture.setImg(picture.getImg().replace("data:image/png;base64,",""));
             picture.setId(file.getAbsolutePath()+"//"+picture.getId()+"_"+random.nextInt(10000)+".png");
-            GenerateImage(picture.getImg(),picture.getId());
+            return GenerateImage(picture.getImg(),picture.getId());
+        }else{
+            return false;
         }
-        return  new ModelAndView( "redirect:"+Optional.ofNullable(picture).map(Picture::getUrl).orElse("https://qq.com"));
     }
+
+    /**
+     * 图片转化并存储到本地
+     * @param imgData
+     * @param imgFilePath
+     * @return
+     */
     public static boolean GenerateImage(String imgData,String imgFilePath) {
         if (imgData == null){
             return false;
