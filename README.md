@@ -1,2 +1,2 @@
-# mirror
-Online love mirror
+# 基于 人脸检测 的颜值分析页面
+# README.md 暂时未来得及写，有问题联系作者即可。
