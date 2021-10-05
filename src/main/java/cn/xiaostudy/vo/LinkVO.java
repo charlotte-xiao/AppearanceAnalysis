@@ -1,7 +1,6 @@
 package cn.xiaostudy.vo;
 
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
 /**
  * @author charlotte xiao
@@ -9,7 +8,10 @@ import lombok.NonNull;
  * @description
  */
 @Data
-public class Link {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class LinkVO {
 
     @NonNull
     private String link;

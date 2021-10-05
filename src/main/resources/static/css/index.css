@@ -1,10 +1,35 @@
+/* 自定义格式 */
 h1{
 	display: block;
-	background: #0099CC!important;
+	background: #00bbcc !important;
 	height: 40px;
+	width: 100%;
 	font-size: 16px;
 	line-height: 38px;
 	color: #fff;
-	border-radius: 4px;
+	border-radius: 5px;
+	margin: 0px;
 	text-align: center;
+}
+.horizontal_center{
+	display: flex;
+	flex-direction: row;
+	justify-content:center;
+	align-items: center
+}
+.horizontal_center_space{
+	display: flex !important;
+	flex-direction: row;
+	justify-content:space-around;
+	align-items: center
+}
+.vertical_center{
+	display: flex;
+	flex-direction: column;
+	justify-content:center;
+	align-items: center
+}
+.margin_middle{
+	margin-bottom: 15px;
+	margin-top: 15px ;
 }

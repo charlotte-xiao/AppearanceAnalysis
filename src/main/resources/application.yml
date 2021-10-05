@@ -1,2 +1,34 @@
+# 服务器
 server:
   port: 9000
+
+# 上传策略
+upload:
+  # 模式：local或者oss
+  mode: local
+  local:
+    # 本地服务器地址
+    url: https://xxxx/
+    # 前缀路径
+    path: images/
+    # 映射路径
+    mapPath: /images/**
+    # 真实路径
+    realPath: ./images/
+  oss:
+    # oss地址
+    url: https://xxxx/
+    # 前缀路径
+    path: mirror/
+    endpoint: https://oss-cn-hangzhou.aliyuncs.com
+    accessKeyId: xxxx
+    accessKeySecret: xxxx
+    bucketName: xxxx
+# 人脸识别
+predict:
+  face:
+    url: https://api-cn.faceplusplus.com/facepp/v3/detect
+    apiKey: xxxx
+    apiSecret: xxxx
+
+

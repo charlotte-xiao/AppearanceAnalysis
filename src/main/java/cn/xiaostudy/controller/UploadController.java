@@ -1,77 +1,47 @@
 package cn.xiaostudy.controller;
 
-import cn.xiaostudy.config.FileMvcConfig;
-import cn.xiaostudy.vo.Picture;
-import lombok.Data;
+import cn.xiaostudy.service.PredictService;
+import cn.xiaostudy.service.UploadService;
+import cn.xiaostudy.util.PredictUtil;
+import cn.xiaostudy.vo.FaceVO;
+import cn.xiaostudy.vo.PictureVO;
+import cn.xiaostudy.vo.Result;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.Base64;
-import java.util.Optional;
-import java.util.Random;
+import javax.annotation.Resource;
 
 /**
+ * 上传图片并进行预测分析
  * @author charlotte xiao
  * @date 2021/9/30
  * @description
  */
 @RestController
-@Data
 public class UploadController {
 
-    private static String HEADER = "data:image/png";
+    @Resource
+    private UploadService uploadService;
 
-    private static Random random = new Random();
-
-    private  static File file = new File(FileMvcConfig.uploadFolder);
-
-    static {
-        if(!file.exists()){file.mkdir();}
-    }
+    @Resource
+    private PredictService predictService;
 
     /**
      * 上传图片
-     * @param picture
-     * @return
+     * @param pictureVO 图片
+     * @return 预测结果
      */
     @PostMapping("/upload")
-    public Boolean upload(@RequestBody Picture picture){
-        if(Optional.ofNullable(picture).map(Picture::getImg).orElse("").contains(HEADER)){
-            picture.setImg(picture.getImg().replace("data:image/png;base64,",""));
-            picture.setId(file.getAbsolutePath()+"//"+picture.getId()+"_"+random.nextInt(10000)+".png");
-            return GenerateImage(picture.getImg(),picture.getId());
-        }else{
-            return false;
-        }
+    public Result<FaceVO> upload(@RequestBody PictureVO pictureVO){
+        String url = uploadService.uploadPicture(pictureVO);
+        System.out.println("-------------------");
+        FaceVO faceVO = predictService.predictPicture(pictureVO);
+        System.out.println(url);
+        System.out.printf(faceVO.toString());
+        String message = PredictUtil.predictMessage(faceVO);
+        System.out.println(message);
+        return Result.ok(faceVO,message);
     }
 
-    /**
-     * 图片转化并存储到本地
-     * @param imgData
-     * @param imgFilePath
-     * @return
-     */
-    public static boolean GenerateImage(String imgData,String imgFilePath) {
-        if (imgData == null){
-            return false;
-        }
-        Base64.Decoder decoder = Base64.getDecoder();
-        try( OutputStream out = new FileOutputStream(imgFilePath)) {
-            byte[] b = decoder.decode(imgData.getBytes());
-            for (int i = 0; i < b.length; ++i) {
-                if (b[i] < 0) {
-                    b[i] += 256;
-                }
-            }
-            out.write(b);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            return true;
-        }
-    }
 }

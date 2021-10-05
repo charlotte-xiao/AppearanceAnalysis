@@ -2,30 +2,117 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>颜值评测</title>
+		<title>颜值分析</title>
 		<link rel="icon" href="./img/ico.jpg">
 		<!-- Element UI CSS -->
 		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+		<link rel="stylesheet" href="./css/index.css">
 	</head>
 	<body>
 		<div id ="app">
-			<div  style="text-align:center;display: flex;justify-content:center">
+			<h1> 颜 值 分 析</h1>
+			<div  class="horizontal_center">
 				<div>
 					<img style="max-width: 100% " src="https://static.xiaostudy.cn/element/lovely.jpg">
 				</div>
-				<div v-loading="this.flag"
-					 element-loading-text="拼命加载中~"
-					 style="display: flex;flex-direction: column;justify-content:center;align-items: center">
-					<div style="line-height: 50px">{{this.content}}</div>
-					<el-progress type="circle" :percentage="this.percent" ></el-progress>
+				<div  class="vertical_center margin_middle">
+					<div style="line-height: 100%" :style="{display: this.defaultShow ? 'block' : 'none'}">{{this.defaultContent}}</div>
+					<div :style="{display: this.defaultShow ? 'none' : 'block'}">
+						<video id="video" style="display: none;" class="src-video" width="400px" height="400px" autoplay="autoplay"></video>
+						<canvas id="canvas" width="400px" height="400px" style="display: none;"></canvas>
+						<img id="photo" src="">
+					</div>
 				</div>
 			</div>
-			<el-row style="text-align: center">
-				<el-button type="primary" plain size="medium" @click="this.predict">评 测</el-button>
+			<el-row class="horizontal_center margin_middle">
+				<el-button icon="el-icon-video-camera" type="primary" @click="this.openMedia"> 开启摄像 </el-button>
+				<el-button icon="el-icon-camera" type="warning" :disabled="this.buttonAble != 2" @click="this.takePhoto"> 拍 照 </el-button>
+				<el-button icon="el-icon-search" type="danger" :disabled="this.buttonAble != 3" @click="this.predict"> 预 测 </el-button>
 			</el-row>
-			<video id="video" width="0" height="0" autoplay></video>
-			<canvas style="width:0px;height:0px" id="canvas" width="480" height="640"></canvas>
+			<el-row class="vertical_center margin_middle"
+					v-loading="this.predictLoading"
+					element-loading-text="拼命加载中. . .">
+				<!--基本数据部分-->
+				<div>
+					<el-table :data = "this.result" style="width: 100%">
+						<el-table-column label="性别" width="100" align="center">
+							<template slot-scope="scope">
+								<el-tag :type = "scope.row.gender == '男' ? '' : scope.row.gender == '女' ? 'danger' : 'info' ">
+									<i class="el-icon-s-custom"></i>  {{scope.row.gender}}
+								</el-tag>
+							</template>
+						</el-table-column>
+						<el-table-column label="年龄" width="100" align="center">
+							<template slot-scope="scope">
+								<el-tag type="warning" >
+									{{scope.row.age}} 岁
+								</el-tag>
+							</template>
+						</el-table-column>
+						<el-table-column label="是否微笑" width="100" align="center">
+							<template slot-scope="scope">
+								<el-tag :type=" scope.row.isSmile ? 'success' : 'danger'" >{{scope.row.isSmile ? "有微笑" : "没有微笑"}}</el-tag>
+							</template>
+						</el-table-column>
+						<el-table-column label="心情" width="180" align="center">
+							<template slot-scope="scope">
+								<el-tag >{{scope.row.emotion}}</el-tag>
+							</template>
+						</el-table-column>
+					</el-table>
+				</div>
+				<!--颜值评分-->
+				<div>
+					<el-table :data = "this.result" style="width: 100%">
+						<el-table-column label="微笑评分" width="180" align="center">
+							<template slot-scope="scope">
+								<el-progress type="circle" :percentage="parseFloat(scope.row.smile)" color="#f56c6c"></el-progress>
+							</template>
+						</el-table-column>
+						<el-table-column label="男性颜值评分" width="180" align="center">
+							<template slot-scope="scope">
+								<el-progress type="circle" :percentage="parseFloat(scope.row.beauty.maleScore)" color="#e6a23c"></el-progress>
+							</template>
+						</el-table-column>
+						<el-table-column label="女性颜值评分" width="180" align="center">
+							<template slot-scope="scope">
+								<el-progress type="circle" :percentage="parseFloat(scope.row.beauty.femaleScore)" color="#6f7ad3"></el-progress>
+							</template>
+						</el-table-column>
+					</el-table>
+				</div>
+				<!--健康评分-->
+				<div>
+					<el-table :data = "this.result" style="width: 100%">
+						<el-table-column label="微笑评分" width="180" align="center">
+							<template slot-scope="scope">
+								<el-progress type="circle" :percentage="parseFloat(scope.row.smile)" color="#5cb87a"></el-progress>
+							</template>
+						</el-table-column>
+						<el-table-column label="健康评分" width="180" align="center">
+							<template slot-scope="scope">
+								<el-progress type="circle" :percentage="parseFloat(scope.row.skin.health)" color="#17cdc4"></el-progress>
+							</template>
+						</el-table-column>
+						<el-table-column label="色斑" width="180" align="center">
+							<template slot-scope="scope">
+								<el-progress type="circle" :percentage="parseFloat(scope.row.skin.acne)" color="#d56ec9"></el-progress>
+							</template>
+						</el-table-column>
+						<el-table-column label="黑眼圈" width="180" align="center">
+							<template slot-scope="scope" >
+								<el-progress type="circle" :percentage="parseFloat(scope.row.skin.darkCircle)" color="#12df7f"></el-progress>
+							</template>
+						</el-table-column>
+					</el-table>
+				</div>
+				<div class="horizontal_center margin_middle">
+					评语：{{this.message}}
+				</div>
+
+			</el-row>
 		</div>
+
 	</body>
 	<!-- import Axois before Element -->
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -38,71 +125,146 @@
 			el: '#app',
 			data: function() {
 				return {
+					buttonAble: 1,
+					defaultShow: true,
+					defaultContent: '',
+					predictLoading: false,
+					/* ID种子 */
 					id : '',
-					img: '',
-					flag: false,
-					content: '您还未开始随机颜值评测，请点击确认开始，并授权开始评测～',
-					percent: 0
+					/* 源视频 */
+					srcVideo: '',
+					/* 媒体流 */
+					mediaStream: '',
+					/* 图片 */
+					photo: '',
+					/* 画布 */
+					canvas: '',
+					/* 数据结果 */
+					result:[{
+						age: 0,
+						beauty: {
+							maleScore: 0,
+							femaleScore: 0
+						},
+						emotion: '没有感情的机器人',
+						gender: '未知',
+						smile: 0,
+						isSmile: false,
+						skin:{
+							health: 0,
+							stain: 0,
+							acne: 0,
+							darkCircle: 0
+						}
+					}],
+					/* 总结评价 */
+					message: '还没有评语哦～'
 				}
+			},
+			mounted: function (){
+				/* 获取ID */
+				this.getId();
+				/* 参数初始化 */
+				this.defaultContent = "您还未开始预测，请点击预测按钮，并授权开始预测～";
+				this.srcVideo = document.querySelector('#video');
+				this.photo = document.querySelector('#photo');
+				this.canvas = document.querySelector('#canvas');
 			},
 			methods:{
 				predict(){
 					let that = this;
-					that.flag = true;
-					let tempId = window.location.pathname;
-					tempId = tempId.substring(tempId.lastIndexOf('/')+1,tempId.length);
-					if(!/^\d+$/.test(tempId)){
-						tempId = this.getQueryVariable("id");
+					that.predictLoading = true;
+					that.$message.success('正在根据您的颜值进行分析，请稍后～');
+					let header = {headers: {"Content-Type": "application/json"}}
+					let data = {id: that.id, img: that.photo.src};
+					axios.post('/upload', JSON.stringify(data),header,{timeout:10000}).then(function (data){
+						if(data.data.flag === true){
+							that.$message.success('预测成功～');
+							that.result = [];
+							that.result.push(data.data.data);
+							that.message = data.data.message;
+							that.photo.src = "";
+						}else{
+							that.$message.error('服务器故障,请稍后刷新重试～');
+						}
+					}).catch(error=>{
+						that.$message.error('服务器故障,请稍后刷新重试～');
+						console.log(error);
+					}).finally(()=> {
+						that.predictLoading = false;
+						that.buttonAble = 1;
+					});
+				},
+				openMedia(){
+					let that = this;
+					this.photo.src='';
+					this.srcVideo.style.display='block';
+					let constraints = {
+						/* 音频轨道 */
+						audio: false,
+						/* 视频轨道 */
+						video: {facingMode:"user",width:400,height:400}
 					}
-					that.id = parseInt(tempId);
-					let canvas = document.getElementById('canvas');
-					let context = canvas.getContext('2d');
-					let video = document.getElementById('video');
 					if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-						navigator.mediaDevices.getUserMedia({
-							video: true
-						}).then(function(stream) {
-							video.srcObject = stream;
-							video.play();
-							setTimeout(function() {
-								context.drawImage(video, 0, 0, 480, 640);
-								stream.getTracks()[0].stop();
-							}, 1000);
-							setTimeout(function() {
-								that.img = canvas.toDataURL('image/png');
-								let data = {id: that.id, img: that.img};
-								let header = {headers: {"Content-Type": "application/json"}}
-								axios.post('/upload', JSON.stringify(data),header,{timeout:10000}).then(function (data){
-									if(data.data){
-										that.$message.success('正在为你进行随机颜值评测分析，请稍后～');
-										that.percent = parseInt(Math.random()*100);
-										that.content = "根据随机颜值预测分析，您的颜值超过了全国"+that.percent+"%的用户,请继续努力～";
-									}else{
-										that.$message.error('服务器故障,请稍后刷新重试～');
-									}
-								}).catch(error=>{
-									that.$message.error('服务器故障，请稍后刷新重试～');
-								})
-							}, 1500);
+						navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+							/* 关闭默认提醒 */
+							that.defaultShow = false;
+							/* 使用这个stream stream */
+							that.mediaStream=stream;
+							that.srcVideo.srcObject = stream;
+							that.srcVideo.play();
+							that.buttonAble = 2;
 						}, function() {
-							that.$message.error('请先给予相机权限，再进行评测～');
-							that.content = "亲，需要相机权限才能评测哦～"
+							/* 开启默认提醒 */
+							that.defaultShow = true;
+							that.$message.error('亲，需要相机权限才能预测哦～');
+							that.defaultContent = "亲，需要相机权限才能预测哦～";
+						}).catch(function (err) {
+							/* 处理error */
+							console.log(err);
 						});
+					}else {
+						that.$message.error("抱歉,暂时无法使用照相功能～");
+						that.defaultContent = "亲，需要相机权限才能预测哦～";
 					}
-					that.flag = false;
+				},
+				takePhoto(){
+					let that = this;
+					/* 图片绘制 */
+					that.canvas.getContext('2d').drawImage(that.srcVideo, 0, 0, 400, 400);
+					/* 将 `canvas`绘制的图片信息，展示在 `img`标签中 */
+					that.photo.src=that.canvas.toDataURL();
+					that.stopVideo();
+					that.srcVideo.style.display='none';
+					that.buttonAble = 3;
+				},
+				stopVideo(){
+					let that = this;
+					/* 关闭摄像头 */
+					that.mediaStream.getTracks().forEach(track => {
+						track.stop();
+					});
+				},
+				getId(){
+					let that = this;
+					if(window.location.pathname === "/index.html" && that.getQueryVariable("id") !== false){
+						/* 指定ID */
+						that.id = that.getQueryVariable("id")
+					}else {
+						/* 随机ID */
+						that.id = window.btoa(parseInt(100000*Math.random()));
+					}
 				},
 				getQueryVariable(variable){
 					let query = window.location.search.substring(1);
 					let vars = query.split("&");
 					for (let i=0;i<vars.length;i++) {
 						let pair = vars[i].split("=");
-						if(pair[0] === variable){return pair[1];}
+						if(pair[0] === variable && /(^[1-9]\d*$)/.test(window.atob(pair[1])) ){return pair[1];}
 					}
-					return parseInt(100000*Math.random()).toString();;
+					return false;
 				}
 			}
 		})
-
-
 	</script>
 </html>
