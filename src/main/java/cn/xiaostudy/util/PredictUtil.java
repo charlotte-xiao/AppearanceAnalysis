@@ -32,8 +32,7 @@ public class PredictUtil {
             case 8:
             case 9:
                 if(Objects.equals(gender,GenderDTO.C_FEMALE)){
-                    //result += "不要再犹豫了，赶快联系作者。暗号：UVE6MTA3Mzc0MTAxOQ==";
-                    result += "如果你还单身，不要再犹豫了，赶快联系作者。简单暗号：528158564 或者 高级暗号: UVE6MTA3Mzc0MTAxOQ==";
+                    result += "如果你还单身，不要再犹豫了，赶快联系作者。";
                 }else{
                     result += "萧萧肃肃,爽朗清举。";
                 }
