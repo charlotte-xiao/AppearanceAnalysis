@@ -9,7 +9,7 @@
         <relativePath/>
     </parent>
     <groupId>cn.xiaostudy</groupId>
-    <artifactId>mirror</artifactId>
+    <artifactId>AppearanceAnalysis</artifactId>
     <version>0.0.1</version>
     <name>mirror</name>
     <description>mirror</description>
